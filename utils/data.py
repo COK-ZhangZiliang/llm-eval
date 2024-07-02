@@ -11,6 +11,7 @@ class DatasetInfo:
     exemple: str
     eval: str
 
+
 def get_dataset_info(dataset):
     """
     根据数据集名返回数据集信息"""
@@ -23,6 +24,7 @@ def get_dataset_info(dataset):
         )
     }[dataset]
 
+
 def load_data(dataset):
     """
     加载数据集"""
@@ -33,6 +35,7 @@ def load_data(dataset):
                         cache_dir="data/")
     return data[dataset_info.exemple], data[dataset_info.eval]
 
+
 def prep_data(dataset, k_shots):
     """
     获取数据集中所有问题"""
@@ -41,7 +44,7 @@ def prep_data(dataset, k_shots):
     print(f"Questions Count: {len(eval_questions)}")
 
     if k_shots == 0:
-        exp_questions = [{} for _ in range(len(eval_questions))]
+        exp_questions = [[] for _ in range(len(eval_questions))]
     else:
         random.seed(42)
         for _ in range(len(eval_questions)): 

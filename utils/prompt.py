@@ -4,8 +4,12 @@ from utils.data import load_data
 def idx2choice(idx):
     return chr(idx + ord("A"))
 
+
 def choice2idx(choice):
+    if choice.isdigit():
+        return int(choice) - 1 # 特殊处理有些数据集的答案是数字的情况
     return ord(choice) - ord("A")
+
 
 @dataclass
 class Prompt:
@@ -27,15 +31,17 @@ class Prompt:
         if is_exp:
             prompt += " " + idx2choice(self.ans_idx)
         return prompt
-    
+
+
 def cp_prompt(data, idx):
     question = data['question']
     choices = data['choices']['text']
     ans_idx = choice2idx(data['answerKey'])
+    idx = ans_idx if idx == -1 else idx
     return Prompt(question, choices, ans_idx).get_cp_prompt(idx)
 
+
 def mcp_prompt(data, is_exp=False):
-    print(data)
     question = data['question']
     choices = data['choices']['text']
     ans_idx = choice2idx(data['answerKey'])
