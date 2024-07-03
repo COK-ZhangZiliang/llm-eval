@@ -1,7 +1,7 @@
 import json
 from .prompt import idx2choice
 
-def calc_mcp_acc(file):
+def calc_mcp_acc(file, torler=False):
     """
     计算mcp策略的准确率"""
     with open(file, "r", encoding='utf-8') as f:
@@ -10,6 +10,9 @@ def calc_mcp_acc(file):
         for line in lines:
             data = json.loads(line)
             if idx2choice(data['Ans']) == data['Pred']:
+                correct += 1
+            elif torler and data['Pred'].isdigit() and \
+                data['Ans'] == int(data['Pred']):
                 correct += 1
         return correct / len(lines)
 
@@ -48,7 +51,7 @@ def calc_cp_acc(file):
         correct = 0
         for line in lines:
             data = json.loads(line)
-            log_probs = [cond_log_probs/lens if lens != 0 else 0
+            log_probs = [cond_log_probs/lens
                          for cond_log_probs, lens 
                          in zip(data['Pred']['cond_log_probs'], data['Pred']['answer_token_lens'])]
             len_ans = log_probs.index(max(log_probs))

@@ -17,6 +17,7 @@ def get_args():
     parser.add_argument('--k_shots', type=int, default=0, help='number of shots')
     parser.add_argument('--mcp', action='store_true', help='use mcp strategy')
     parser.add_argument('--cp', action='store_true', help='use cp stategy')
+    parser.add_argument('--torler', action='store_true', help='use torlerance strategy')
 
     return parser.parse_args()
 
@@ -55,7 +56,7 @@ if __name__ == "__main__":
     args = get_args()
     run_exp(args)
     if args.mcp:
-        acc = calc_mcp_acc(f"results/{args.model}/{args.dataset}-mcp-{args.k_shots}.json")
+        acc = calc_mcp_acc(f"results/{args.model}/{args.dataset}-mcp-{args.k_shots}.json", args.torler)
     elif args.cp:
         acc = calc_cp_acc(f"results/{args.model}/{args.dataset}-cp-{args.k_shots}.json")
 

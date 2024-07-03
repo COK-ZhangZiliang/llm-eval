@@ -6,7 +6,7 @@ import torch
 
 model_path = {
     'qwen2-0.5B-ins': 'Qwen/Qwen2-0.5B-Instruct',
-    'qwen2-7B-ins': 'Qwen/Qwen2-7B-Instruct'
+    'qwen2-1.5B-ins': 'Qwen/Qwen2-1.5B-Instruct'
 }
 
 
@@ -24,9 +24,9 @@ class qwen:
         inputs = self.tokenizer(text, return_tensors="pt")
         with torch.no_grad():
             outputs = self.model(**inputs)
-        return outputs.logits[0].log_softmax(dim=-1)
+        return outputs.logits[0].log_softmax(dim=-1), inputs.input_ids[0]
     
-    def cp_eval(self, question, exmaples, isdebug=False):
+    def cp_eval(self, question, exmaples):
         exp_prompts = ""
         for exp in exmaples:
             exp_prompts += cp_prompt(exp, -1) + "\n\n"
@@ -36,16 +36,20 @@ class qwen:
         cond_log_probs = []
         for i, choice in enumerate(question["choices"]["text"]):
             # 计算非条件概率
-            uncond_prompts = f"Answer: {choice}"
-            log_probs = self._get_log_probs(uncond_prompts)[2: -1]
-            ans_token_len = log_probs.size(0)
+            uncond_prompts = f"Answer: {choice} "
+            log_probs, inputids = self._get_log_probs(uncond_prompts)
+            log_probs, inputids= log_probs[2:-1], inputids[2:-1]
+            token_log_probs = [log_probs[i, j].item() for i, j in enumerate(inputids)]
+            ans_token_len = len(token_log_probs)
             answer_token_lens.append(ans_token_len)
-            uncond_log_probs.append(log_probs.sum().item())
+            uncond_log_probs.append(sum(token_log_probs))
             
             # 计算条件概率
-            cond_prompts = exp_prompts + cp_prompt(question, i)
-            log_probs = self._get_log_probs(cond_prompts)[-(ans_token_len+1):-1]
-            cond_log_probs.append(log_probs.sum().item())
+            cond_prompts = exp_prompts + cp_prompt(question, i) + " "
+            log_probs, inputids = self._get_log_probs(cond_prompts)
+            log_probs, inputids = log_probs[-(ans_token_len+1):-1], inputids[-(ans_token_len+1):-1]
+            token_log_probs = [log_probs[i, j].item() for i, j in enumerate(inputids)]
+            cond_log_probs.append(sum(token_log_probs))
         
         return {'uncond_log_probs': uncond_log_probs, 
                 'cond_log_probs': cond_log_probs, 
@@ -55,7 +59,7 @@ class qwen:
         prompts = ""
         for exp in exmaples:
             prompts += mcp_prompt(exp, is_exp=True) + "\n\n"
-        prompts += mcp_prompt(question)
+        prompts += mcp_prompt(question) + " "
         inputs = self.tokenizer(prompts, return_tensors="pt")
         with torch.no_grad():
             outputs = self.model(**inputs)
@@ -68,6 +72,6 @@ class qwen:
 def get_model(model):
     return {
         "qwen2-0.5B-ins": qwen(model),
-        "qwen2-7B-ins": qwen(model)
+        "qwen2-1.5B-ins": qwen(model)
     }[model]
            

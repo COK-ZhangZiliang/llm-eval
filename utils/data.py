@@ -21,6 +21,12 @@ def get_dataset_info(dataset):
             name="ARC-Challenge",
             exemple="train",
             eval="test",
+        ),
+        "ae": DatasetInfo(
+            path="ai2_arc",
+            name="ARC-Easy",
+            exemple="train",
+            eval="test",
         )
     }[dataset]
 
