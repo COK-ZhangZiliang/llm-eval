@@ -19,12 +19,15 @@ class qwen:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, cache_dir="model/")
         self.model = AutoModelForCausalLM.from_pretrained(model_name, cache_dir="model/")
         self.idx2val = {v: k for k, v in self.tokenizer.get_vocab().items()}
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model.to(self.device)
 
     def _get_log_probs(self, text):
         inputs = self.tokenizer(text, return_tensors="pt")
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
         with torch.no_grad():
             outputs = self.model(**inputs)
-        return outputs.logits[0].log_softmax(dim=-1), inputs.input_ids[0]
+        return outputs.logits[0].log_softmax(dim=-1), inputs["input_ids"][0]
     
     def cp_eval(self, question, exmaples):
         exp_prompts = ""
@@ -61,6 +64,7 @@ class qwen:
             prompts += mcp_prompt(exp, is_exp=True) + "\n\n"
         prompts += mcp_prompt(question) + " "
         inputs = self.tokenizer(prompts, return_tensors="pt")
+        inputs = {k: v.to(self.device) for k, v in inputs.items()}
         with torch.no_grad():
             outputs = self.model(**inputs)
         logits = outputs.logits[0, -1]

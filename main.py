@@ -14,7 +14,7 @@ def get_args():
     parser = ArgumentParser(description='llm evaluation')
     parser.add_argument('--model', type=str, default='qwen2-0.5B-ins', help='model name')
     parser.add_argument('--dataset', type=str, default='ac', help='dataset name')
-    parser.add_argument('--k_shots', type=int, default=0, help='number of shots')
+    parser.add_argument('--k_shot', type=int, default=0, help='number of shot')
     parser.add_argument('--mcp', action='store_true', help='use mcp strategy')
     parser.add_argument('--cp', action='store_true', help='use cp stategy')
     parser.add_argument('--torler', action='store_true', help='use torlerance strategy')
@@ -28,12 +28,12 @@ def run_exp(args):
     # 创建结果文件
     strategy = "mcp" if args.mcp else "cp"
     os.makedirs(f"results/{args.model}", exist_ok=True)
-    results_path = f"results/{args.model}/{args.dataset}-{strategy}-{args.k_shots}.json"
+    results_path = f"results/{args.model}/{args.dataset}-{strategy}-{args.k_shot}.json"
     if os.path.exists(results_path): # 如果已经评估过，直接返回
         return
 
     # 加载数据和模型
-    questions, exmples = prep_data(args.dataset, args.k_shots)
+    questions, exmples = prep_data(args.dataset, args.k_shot)
     model= get_model(args.model)
 
     # 评估并保存结果
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     args = get_args()
     run_exp(args)
     if args.mcp:
-        acc = calc_mcp_acc(f"results/{args.model}/{args.dataset}-mcp-{args.k_shots}.json", args.torler)
+        acc = calc_mcp_acc(f"results/{args.model}/{args.dataset}-mcp-{args.k_shot}.json", args.torler)
     elif args.cp:
-        acc = calc_cp_acc(f"results/{args.model}/{args.dataset}-cp-{args.k_shots}.json")
+        acc = calc_cp_acc(f"results/{args.model}/{args.dataset}-cp-{args.k_shot}.json")
 
     print(f"Accuracy: {acc}")
