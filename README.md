@@ -1,6 +1,6 @@
 ## LLM Evaluation
 ### Introduction & Usage
-本项目是对[论文](https://arxiv.org/abs/2210.12353)中所提到的`CP`和`MCP`两种评估方式的实现，支持对模型`Qwen2-0.5B-Instruct`和`Qwen2-1.5B-Instruct`在数据集`ARC-Easy`和`ARC-Challenge`上进行评估，主要包括以下几个部分：
+本项目是对[Leveraging Large Language Models for Multiple Choice Question Answering](https://arxiv.org/abs/2210.12353)中所提到的`CP`和`MCP`两种评估方式的实现，支持对模型`Qwen2-0.5B-Instruct`和`Qwen2-1.5B-Instruct`在数据集`ARC-Easy`和`ARC-Challenge`上进行评估，主要包括以下几个部分：
 
 - `main.py`: 主程序，用于调用`CP`和`MCP`两种评估方式
 - `eval.py`: 包括具体模型所对应的类，类中实现了对该模型的`CP`和`MCP`评估方法
